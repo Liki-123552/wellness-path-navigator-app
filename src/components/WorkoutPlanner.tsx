@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dumbbell, Clock, Target, Zap, PlayCircle, CheckCircle } from 'lucide-react';
+import { Dumbbell, Clock, Target, Users } from 'lucide-react';
 
 interface Exercise {
   name: string;
+  sets: string;
+  reps: string;
   duration: string;
-  sets?: string;
-  reps?: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   equipment: string[];
   benefits: string[];
@@ -21,484 +22,310 @@ interface WorkoutPlan {
   name: string;
   description: string;
   duration: string;
-  frequency: string;
-  days: {
-    day: string;
-    focus: string;
-    exercises: Exercise[];
-  }[];
-  tips: string[];
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  exercises: Exercise[];
 }
 
 const WorkoutPlanner = () => {
-  const [selectedCondition, setSelectedCondition] = useState<string>('');
-  const [fitnessLevel, setFitnessLevel] = useState<string>('');
-  const [timeAvailable, setTimeAvailable] = useState<string>('');
-  const [currentPlan, setCurrentPlan] = useState<WorkoutPlan | null>(null);
+  const [userProfile, setUserProfile] = useState({
+    age: '',
+    weight: '',
+    height: '',
+    fitnessLevel: '',
+    goals: '',
+    availableTime: ''
+  });
 
-  const healthConditions = [
-    { value: 'diabetes', label: 'Diabetes' },
-    { value: 'heart', label: 'Heart Disease' },
-    { value: 'arthritis', label: 'Arthritis' },
-    { value: 'back', label: 'Back Pain' },
-    { value: 'obesity', label: 'Obesity' },
-    { value: 'healthy', label: 'Generally Healthy' }
-  ];
+  const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
 
-  const fitnessLevels = [
-    { value: 'beginner', label: 'Beginner (0-6 months)' },
-    { value: 'intermediate', label: 'Intermediate (6-24 months)' },
-    { value: 'advanced', label: 'Advanced (2+ years)' }
-  ];
-
-  const timeOptions = [
-    { value: '15', label: '15-20 minutes' },
-    { value: '30', label: '30-45 minutes' },
-    { value: '60', label: '60+ minutes' }
-  ];
-
-  const workoutPlans: Record<string, WorkoutPlan> = {
-    diabetes: {
-      name: 'Diabetes Management Workout',
-      description: 'Low-impact cardio and strength training to improve insulin sensitivity',
-      duration: '30-45 minutes',
-      frequency: '4-5 days per week',
-      days: [
+  const workoutPlans: WorkoutPlan[] = [
+    {
+      name: "Beginner Full Body",
+      description: "Perfect for those starting their fitness journey",
+      duration: "30-45 minutes",
+      difficulty: "beginner",
+      exercises: [
         {
-          day: 'Monday & Thursday',
-          focus: 'Cardio + Upper Body',
-          exercises: [
-            {
-              name: 'Brisk Walking',
-              duration: '15-20 minutes',
-              difficulty: 'beginner',
-              equipment: ['None'],
-              benefits: ['Improves insulin sensitivity', 'Burns glucose', 'Low impact']
-            },
-            {
-              name: 'Wall Push-ups',
-              sets: '2-3',
-              reps: '8-12',
-              difficulty: 'beginner',
-              equipment: ['Wall'],
-              benefits: ['Builds upper body strength', 'Easy on joints']
-            },
-            {
-              name: 'Seated Rows',
-              sets: '2-3',
-              reps: '10-15',
-              difficulty: 'beginner',
-              equipment: ['Resistance band'],
-              benefits: ['Strengthens back muscles', 'Improves posture']
-            }
-          ]
+          name: "Push-ups",
+          sets: "3",
+          reps: "8-12",
+          duration: "2-3 minutes",
+          difficulty: "beginner",
+          equipment: ["bodyweight"],
+          benefits: ["chest strength", "arm strength"]
         },
         {
-          day: 'Tuesday & Friday',
-          focus: 'Lower Body + Core',
-          exercises: [
-            {
-              name: 'Chair Squats',
-              sets: '2-3',
-              reps: '8-12',
-              difficulty: 'beginner',
-              equipment: ['Chair'],
-              benefits: ['Strengthens legs', 'Improves balance', 'Functional movement']
-            },
-            {
-              name: 'Modified Planks',
-              duration: '20-30 seconds',
-              sets: '2-3',
-              difficulty: 'beginner',
-              equipment: ['None'],
-              benefits: ['Core stability', 'Improves posture']
-            }
-          ]
+          name: "Squats",
+          sets: "3",
+          reps: "10-15",
+          duration: "3-4 minutes",
+          difficulty: "beginner",
+          equipment: ["bodyweight"],
+          benefits: ["leg strength", "core stability"]
+        },
+        {
+          name: "Plank",
+          sets: "3",
+          reps: "30-60 seconds",
+          duration: "2-3 minutes",
+          difficulty: "beginner",
+          equipment: ["bodyweight"],
+          benefits: ["core strength", "stability"]
         }
-      ],
-      tips: [
-        'Monitor blood sugar before and after exercise',
-        'Keep glucose tablets nearby during workouts',
-        'Stay hydrated throughout your session',
-        'Start slowly and gradually increase intensity'
       ]
     },
-    heart: {
-      name: 'Heart-Healthy Cardio Plan',
-      description: 'Gentle cardiovascular exercises to strengthen the heart safely',
-      duration: '20-40 minutes',
-      frequency: '5-6 days per week',
-      days: [
+    {
+      name: "Intermediate Strength",
+      description: "Build muscle and increase strength",
+      duration: "45-60 minutes",
+      difficulty: "intermediate",
+      exercises: [
         {
-          day: 'Daily Options',
-          focus: 'Low-Impact Cardio',
-          exercises: [
-            {
-              name: 'Walking',
-              duration: '20-30 minutes',
-              difficulty: 'beginner',
-              equipment: ['None'],
-              benefits: ['Improves heart health', 'Low impact', 'Accessible anywhere']
-            },
-            {
-              name: 'Swimming',
-              duration: '15-25 minutes',
-              difficulty: 'intermediate',
-              equipment: ['Pool'],
-              benefits: ['Full body workout', 'Joint-friendly', 'Excellent cardio']
-            },
-            {
-              name: 'Stationary Cycling',
-              duration: '15-30 minutes',
-              difficulty: 'beginner',
-              equipment: ['Exercise bike'],
-              benefits: ['Heart strengthening', 'Leg muscle development', 'Low impact']
-            }
-          ]
-        }
-      ],
-      tips: [
-        'Start with 5-10 minutes and gradually increase',
-        'Monitor heart rate - stay in target zone',
-        'Stop if you feel chest pain or shortness of breath',
-        'Warm up and cool down properly'
-      ]
-    },
-    healthy: {
-      name: 'Complete Fitness Program',
-      description: 'Balanced strength, cardio, and flexibility training for overall health',
-      duration: '45-60 minutes',
-      frequency: '4-6 days per week',
-      days: [
-        {
-          day: 'Monday & Thursday',
-          focus: 'Upper Body Strength',
-          exercises: [
-            {
-              name: 'Push-ups',
-              sets: '3-4',
-              reps: '8-15',
-              difficulty: 'intermediate',
-              equipment: ['None'],
-              benefits: ['Chest and arm strength', 'Core stability']
-            },
-            {
-              name: 'Pull-ups/Lat Pulldowns',
-              sets: '3-4',
-              reps: '6-12',
-              difficulty: 'intermediate',
-              equipment: ['Pull-up bar or gym'],
-              benefits: ['Back and bicep strength', 'Improves posture']
-            },
-            {
-              name: 'Shoulder Press',
-              sets: '3',
-              reps: '10-12',
-              difficulty: 'intermediate',
-              equipment: ['Dumbbells'],
-              benefits: ['Shoulder strength', 'Functional movement']
-            }
-          ]
+          name: "Deadlifts",
+          sets: "4",
+          reps: "6-8",
+          duration: "5-6 minutes",
+          difficulty: "intermediate",
+          equipment: ["barbell", "weights"],
+          benefits: ["full body strength", "posterior chain"]
         },
         {
-          day: 'Tuesday & Friday',
-          focus: 'Lower Body & Core',
-          exercises: [
-            {
-              name: 'Squats',
-              sets: '3-4',
-              reps: '12-20',
-              difficulty: 'intermediate',
-              equipment: ['None or weights'],
-              benefits: ['Leg strength', 'Functional movement', 'Core engagement']
-            },
-            {
-              name: 'Deadlifts',
-              sets: '3',
-              reps: '8-12',
-              difficulty: 'intermediate',
-              equipment: ['Dumbbells or barbell'],
-              benefits: ['Full body strength', 'Posterior chain development']
-            },
-            {
-              name: 'Planks',
-              duration: '30-60 seconds',
-              sets: '3',
-              difficulty: 'intermediate',
-              equipment: ['None'],
-              benefits: ['Core strength', 'Stability', 'Posture improvement']
-            }
-          ]
+          name: "Bench Press",
+          sets: "4",
+          reps: "8-10",
+          duration: "5-6 minutes",
+          difficulty: "intermediate",
+          equipment: ["barbell", "bench"],
+          benefits: ["chest strength", "shoulder stability"]
         },
         {
-          day: 'Wednesday & Saturday',
-          focus: 'Cardio & Flexibility',
-          exercises: [
-            {
-              name: 'HIIT Training',
-              duration: '20-25 minutes',
-              difficulty: 'advanced',
-              equipment: ['None'],
-              benefits: ['Cardiovascular fitness', 'Fat burning', 'Time efficient']
-            },
-            {
-              name: 'Yoga Flow',
-              duration: '15-20 minutes',
-              difficulty: 'beginner',
-              equipment: ['Yoga mat'],
-              benefits: ['Flexibility', 'Stress relief', 'Balance improvement']
-            }
-          ]
+          name: "Pull-ups",
+          sets: "3",
+          reps: "5-8",
+          duration: "4-5 minutes",
+          difficulty: "intermediate",
+          equipment: ["pull-up bar"],
+          benefits: ["back strength", "arm strength"]
+        },
+        {
+          name: "Overhead Press",
+          sets: "3",
+          reps: "8-10",
+          duration: "4-5 minutes",
+          difficulty: "intermediate",
+          equipment: ["barbell", "dumbbells"],
+          benefits: ["shoulder strength", "core stability"]
+        },
+        {
+          name: "Bulgarian Split Squats",
+          sets: "3",
+          reps: "10-12 each leg",
+          duration: "5-6 minutes",
+          difficulty: "intermediate",
+          equipment: ["bench", "dumbbells"],
+          benefits: ["leg strength", "balance"]
         }
-      ],
-      tips: [
-        'Progressive overload - gradually increase weights/reps',
-        'Focus on proper form over heavy weights',
-        'Get adequate rest between workout days',
-        'Track your progress to stay motivated'
       ]
     }
-  };
+  ];
 
-  const generateWorkout = () => {
-    const plan = workoutPlans[selectedCondition];
-    if (plan) {
-      setCurrentPlan(plan);
-    }
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleProfileSubmit = () => {
+    // Simple logic to recommend a plan based on fitness level
+    const recommendedPlan = userProfile.fitnessLevel === 'beginner' 
+      ? workoutPlans[0] 
+      : workoutPlans[1];
+    setSelectedPlan(recommendedPlan);
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Personalized Workout Plans</h2>
-        <p className="text-gray-600">Get customized exercise routines based on your health condition and fitness level</p>
+        <p className="text-gray-600">Get a custom workout plan tailored to your fitness goals</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5" />
-            Fitness Assessment
-          </CardTitle>
-          <CardDescription>Tell us about your health and fitness preferences</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Health Condition</label>
-              <Select value={selectedCondition} onValueChange={setSelectedCondition}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select condition" />
-                </SelectTrigger>
-                <SelectContent>
-                  {healthConditions.map((condition) => (
-                    <SelectItem key={condition.value} value={condition.value}>
-                      {condition.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {!selectedPlan ? (
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-blue-600" />
+              Tell Us About Yourself
+            </CardTitle>
+            <CardDescription>We'll create a personalized workout plan based on your profile</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  placeholder="e.g., 25"
+                  value={userProfile.age}
+                  onChange={(e) => setUserProfile({...userProfile, age: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight">Weight (kg)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  placeholder="e.g., 70"
+                  value={userProfile.weight}
+                  onChange={(e) => setUserProfile({...userProfile, weight: e.target.value})}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Fitness Level</label>
-              <Select value={fitnessLevel} onValueChange={setFitnessLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {fitnessLevels.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="height">Height (cm)</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  placeholder="e.g., 175"
+                  value={userProfile.height}
+                  onChange={(e) => setUserProfile({...userProfile, height: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="fitness-level">Fitness Level</Label>
+                <Select onValueChange={(value) => setUserProfile({...userProfile, fitnessLevel: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Time Available</label>
-              <Select value={timeAvailable} onValueChange={setTimeAvailable}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map((time) => (
-                    <SelectItem key={time.value} value={time.value}>
-                      {time.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="goals">Primary Goal</Label>
+                <Select onValueChange={(value) => setUserProfile({...userProfile, goals: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weight-loss">Weight Loss</SelectItem>
+                    <SelectItem value="muscle-gain">Muscle Gain</SelectItem>
+                    <SelectItem value="endurance">Endurance</SelectItem>
+                    <SelectItem value="general-fitness">General Fitness</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="time">Available Time (minutes)</Label>
+                <Select onValueChange={(value) => setUserProfile({...userProfile, availableTime: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                    <SelectItem value="90">90+ minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            <Button onClick={handleProfileSubmit} className="w-full" size="lg">
+              Get My Workout Plan
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Dumbbell className="w-5 h-5 text-blue-600" />
+                    {selectedPlan.name}
+                  </CardTitle>
+                  <CardDescription>{selectedPlan.description}</CardDescription>
+                </div>
+                <Badge variant="outline" className="capitalize">
+                  {selectedPlan.difficulty}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  {selectedPlan.duration}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  {selectedPlan.exercises.length} exercises
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4">
+            {selectedPlan.exercises.map((exercise, index) => (
+              <Card key={index}>
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-lg">{exercise.name}</h3>
+                    <Badge variant="secondary" className="capitalize">
+                      {exercise.difficulty}
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Sets:</span>
+                      <p className="font-medium">{exercise.sets}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Reps:</span>
+                      <p className="font-medium">{exercise.reps}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Duration:</span>
+                      <p className="font-medium">{exercise.duration}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-sm text-gray-600">Equipment: </span>
+                      {exercise.equipment.map((item, i) => (
+                        <Badge key={i} variant="outline" className="text-xs mr-1">
+                          {item}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-600">Benefits: </span>
+                      {exercise.benefits.map((benefit, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs mr-1">
+                          {benefit}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           <Button 
-            onClick={generateWorkout}
-            disabled={!selectedCondition || !fitnessLevel || !timeAvailable}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            onClick={() => setSelectedPlan(null)} 
+            variant="outline" 
+            className="w-full"
           >
-            <Dumbbell className="w-4 h-4 mr-2" />
-            Generate My Workout Plan
+            Create New Plan
           </Button>
-        </CardContent>
-      </Card>
-
-      {currentPlan && (
-        <div className="space-y-6">
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-900">
-                <Zap className="w-5 h-5" />
-                {currentPlan.name}
-              </CardTitle>
-              <CardDescription className="text-blue-700">
-                {currentPlan.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium">Duration:</span>
-                    <span>{currentPlan.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium">Frequency:</span>
-                    <span>{currentPlan.frequency}</span>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Key Benefits</h4>
-                  <ul className="text-sm text-gray-700 space-y-1">
-                    <li>• Improves cardiovascular health</li>
-                    <li>• Builds functional strength</li>
-                    <li>• Enhances overall fitness</li>
-                    <li>• Supports your health condition</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Tabs defaultValue="workouts" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="workouts">Workout Schedule</TabsTrigger>
-              <TabsTrigger value="tips">Tips & Guidelines</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="workouts" className="space-y-4">
-              {currentPlan.days.map((day, dayIndex) => (
-                <Card key={dayIndex}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PlayCircle className="w-5 h-5 text-blue-600" />
-                      {day.day}
-                    </CardTitle>
-                    <CardDescription>Focus: {day.focus}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {day.exercises.map((exercise, exerciseIndex) => (
-                        <div key={exerciseIndex} className="border rounded-lg p-4 bg-gray-50">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-lg">{exercise.name}</h4>
-                            <Badge className={getDifficultyColor(exercise.difficulty)}>
-                              {exercise.difficulty}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              {exercise.duration && (
-                                <p className="text-sm"><span className="font-medium">Duration:</span> {exercise.duration}</p>
-                              )}
-                              {exercise.sets && (
-                                <p className="text-sm"><span className="font-medium">Sets:</span> {exercise.sets}</p>
-                              )}
-                              {exercise.reps && (
-                                <p className="text-sm"><span className="font-medium">Reps:</span> {exercise.reps}</p>
-                              )}
-                              <div className="flex flex-wrap gap-1">
-                                <span className="text-sm font-medium">Equipment:</span>
-                                {exercise.equipment.map((eq, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {eq}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h5 className="font-medium text-sm mb-1">Benefits:</h5>
-                              <ul className="text-sm text-gray-600 space-y-1">
-                                {exercise.benefits.map((benefit, index) => (
-                                  <li key={index} className="flex items-start gap-1">
-                                    <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
-                                    {benefit}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-            
-            <TabsContent value="tips">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Important Guidelines</CardTitle>
-                  <CardDescription>
-                    Follow these tips to maximize your workout effectiveness and safety
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {currentPlan.tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-bold text-blue-600">{index + 1}</span>
-                        </div>
-                        <span className="text-gray-700">{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-
-          <Card className="bg-yellow-50 border-yellow-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Target className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-yellow-900 mb-1">Safety Reminder</h4>
-                  <p className="text-sm text-yellow-800">
-                    Always consult with your healthcare provider before starting any new exercise program, 
-                    especially if you have pre-existing health conditions. Listen to your body and stop 
-                    if you experience any pain or discomfort.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
     </div>

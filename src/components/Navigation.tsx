@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, Stethoscope, Apple, Dumbbell, BarChart3 } from 'lucide-react';
+import { Heart, Stethoscope, Apple, Dumbbell, BarChart3, Activity } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -11,6 +11,7 @@ interface NavigationProps {
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'assessment', label: 'Health Assessment', icon: Activity },
     { id: 'symptoms', label: 'Symptom Checker', icon: Stethoscope },
     { id: 'diet', label: 'Diet Plans', icon: Apple },
     { id: 'workout', label: 'Workout Plans', icon: Dumbbell },
@@ -20,7 +21,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => onTabChange('landing')}>
             <Heart className="w-8 h-8 text-blue-600" />
             <h1 className="text-2xl font-bold text-gray-900">HealthAI</h1>
           </div>
